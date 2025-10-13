@@ -2,6 +2,12 @@
 
 A fast-paced, neon-styled endless runner where you dodge obstacles by jumping and switching lanes mid-air. Build massive combos with perfectly timed jumps to unlock powerful double-jump abilities and rack up high scores!
 
+## 🎮 [Play Now!](https://echooff3.github.io/space-cars/)
+
+**👉 [https://echooff3.github.io/space-cars/](https://echooff3.github.io/space-cars/) 👈**
+
+---
+
 ## 🎮 How to Play
 
 - **Tap** anywhere to jump
