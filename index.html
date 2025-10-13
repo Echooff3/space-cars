@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Neon Drift Simulator</title>
+    <link rel="stylesheet" href="./src/styles/index.css" />
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+        font-family: 'Arial', sans-serif;
+        color: #fff;
+        touch-action: none; /* Prevent default touch behaviors */
+      }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.163/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163/examples/jsm/"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="game-container">
+      <canvas id="game-canvas"></canvas>
+      <div id="ui-overlay">
+        <div id="score">Score: 0</div>
+        <div id="high-score">High Score: 0</div>
+        <div id="controls">Swipe left/right to lane change, swipe up to jump</div>
+        <div id="game-over" style="display: none;">Game Over! Tap to Restart</div>
+      </div>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
