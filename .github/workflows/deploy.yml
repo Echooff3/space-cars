@@ -21,16 +21,8 @@ jobs:
         run: npm ci
 
       - name: Compile TypeScript
-        run: npx tsc
-
-      - name: Copy static files
-        run: |
-          mkdir -p dist
-          cp index.html dist/
-          cp -r src/styles dist/
-          cp -r src/libs dist/
-          cp dist/*.js dist/
-
+        run: npm run build
+        
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
