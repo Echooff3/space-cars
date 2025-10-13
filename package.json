@@ -1,0 +1,14 @@
+{
+  "name": "space-cars",
+  "version": "1.0.0",
+  "description": "Space Cars game",
+  "main": "src/main.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "Echooff3",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
