@@ -61,6 +61,53 @@ export const ui = {
     if (gameOverEl) gameOverEl.style.display = 'none';
   },
 
+  showJumpBonus(points: number = 30, multiplier: number = 1): void {
+    // Create floating points text with multiplier
+    const bonus = document.createElement('div');
+    
+    // Display text with multiplier if > 1
+    if (multiplier > 1) {
+      bonus.innerHTML = `+${points}<br><span style="font-size: 2rem;">x${multiplier} COMBO!</span>`;
+    } else {
+      bonus.textContent = `+${points}`;
+    }
+    
+    bonus.style.position = 'absolute';
+    bonus.style.top = '50%';
+    bonus.style.left = '50%';
+    bonus.style.transform = 'translate(-50%, -50%)';
+    bonus.style.fontSize = multiplier > 1 ? '4rem' : '3rem'; // Bigger for combos
+    bonus.style.fontWeight = '900';
+    
+    // Color changes based on multiplier
+    const colors = [
+      '#ffff00', // 1x - yellow
+      '#ffaa00', // 2x - orange
+      '#ff6600', // 3x - orange-red
+      '#ff3300', // 4x - red-orange
+      '#ff00ff', // 5x+ - magenta
+    ];
+    const colorIndex = Math.min(multiplier - 1, colors.length - 1);
+    const color = colors[colorIndex];
+    
+    bonus.style.color = color;
+    bonus.style.textShadow = `0 0 20px ${color}, 0 0 40px ${color}`;
+    bonus.style.pointerEvents = 'none';
+    bonus.style.zIndex = '100';
+    bonus.style.animation = 'floatUp 1s ease-out forwards';
+    bonus.style.fontFamily = "'Orbitron', sans-serif";
+    bonus.style.textAlign = 'center';
+    bonus.style.lineHeight = '1.2';
+    
+    const container = document.getElementById('game-container');
+    if (container) {
+      container.appendChild(bonus);
+      setTimeout(() => {
+        bonus.remove();
+      }, 1000);
+    }
+  },
+
   async saveHighScore(score: number): Promise<void> {
     const currentHigh = await persistence.getItem('highScore');
     const parsedHigh = parseInt(currentHigh ?? '0');

@@ -1,7 +1,7 @@
 
 import * as THREE from 'three';
 import { createNeonMaterial } from './utils';
-import { LANE_WIDTH, JUMP_HEIGHT, JUMP_DURATION } from './definitions';
+import { LANE_WIDTH, JUMP_HEIGHT, JUMP_DURATION, DIP_DURATION, DIP_DEPTH } from './definitions';
 
 export class Car {
   mesh: THREE.Mesh;
@@ -9,6 +9,10 @@ export class Car {
   targetX: number;
   jumping: boolean = false;
   jumpFrame: number = 0;
+  jumpDuration: number = JUMP_DURATION; // Dynamic jump duration
+  maxJumpDuration: number = JUMP_DURATION * 2.5; // Cap at 2.5x base duration
+  dipping: boolean = false;
+  dipFrame: number = 0;
 
   constructor() {
     const geometry = new THREE.BoxGeometry(1, 0.5, 2);
@@ -33,25 +37,59 @@ export class Car {
   }
 
   jump(): void {
-    if (!this.jumping) {
-      this.jumping = true;
-      this.jumpFrame = JUMP_DURATION;
+    if (!this.jumping && !this.dipping) {
+      this.dipping = true;
+      this.dipFrame = DIP_DURATION;
     }
+  }
+
+  extendJumpDuration(amount: number = 10): void {
+    // Extend the current jump duration, capped at max
+    this.jumpDuration = Math.min(this.jumpDuration + amount, this.maxJumpDuration);
+    
+    // If currently jumping, also extend the current jump
+    if (this.jumping) {
+      this.jumpFrame += amount;
+    }
+  }
+
+  resetJumpDuration(): void {
+    this.jumpDuration = JUMP_DURATION;
   }
 
   update(): void {
     this.mesh.position.x += (this.targetX - this.mesh.position.x) * 0.1;
 
+    // Handle dip animation before jump
+    if (this.dipping) {
+      const dipProgress = 1 - (this.dipFrame / DIP_DURATION);
+      // Smooth easing for dip using sine wave
+      const easedProgress = Math.sin(dipProgress * Math.PI / 2);
+      this.mesh.position.y = 0.25 - (easedProgress * DIP_DEPTH);
+      
+      this.dipFrame--;
+      
+      if (this.dipFrame <= 0) {
+        this.dipping = false;
+        this.jumping = true;
+        this.jumpFrame = this.jumpDuration;
+      }
+    }
+
     if (this.jumping) {
-      const halfDuration = JUMP_DURATION / 2;
+      const totalDuration = this.jumpDuration;
+      const halfDuration = totalDuration / 2;
+      
       if (this.jumpFrame > halfDuration) {
-        // Ascending
+        // Ascending - use ease-out for smoother launch
         const progress = 1 - (this.jumpFrame - halfDuration) / halfDuration;
-        this.mesh.position.y = 0.25 + progress * JUMP_HEIGHT;
+        const easedProgress = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+        this.mesh.position.y = 0.25 + easedProgress * JUMP_HEIGHT;
       } else {
-        // Descending
+        // Descending - use ease-in for bouncy landing
         const progress = this.jumpFrame / halfDuration;
-        this.mesh.position.y = 0.25 + progress * JUMP_HEIGHT;
+        const easedProgress = Math.pow(progress, 2); // quadratic ease-in
+        this.mesh.position.y = 0.25 + easedProgress * JUMP_HEIGHT;
       }
       this.jumpFrame--;
 
@@ -84,6 +122,7 @@ export class Car {
 export class Obstacle {
   mesh: THREE.Mesh;
   speed: number;
+  jumpedOver: boolean = false; // Track if player has jumped over this obstacle
 
   constructor(mesh: THREE.Mesh, speed: number) {
     this.mesh = mesh;
