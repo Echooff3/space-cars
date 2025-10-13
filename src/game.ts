@@ -21,6 +21,7 @@ export function game(scene: THREE.Scene) {
   let comboCount = 0; // Number of consecutive successful jumps
   let lastJumpTime = 0; // Time since last successful jump
   const COMBO_TIMEOUT = 120; // Frames before combo resets (2 seconds at 60fps)
+  let jumpsSinceLastDoubleJump = 0; // Track jumps to re-enable double jump
 
   // Add initial objects
   scene.add(car.mesh);
@@ -140,6 +141,18 @@ export function game(scene: THREE.Scene) {
         comboMultiplier = Math.min(comboCount, 10); // Cap at 10x multiplier
         lastJumpTime = 0; // Reset combo timer
         
+        // Track jumps for double jump unlock
+        jumpsSinceLastDoubleJump++;
+        
+        // Enable double jump after 2 consecutive successful jumps
+        if (comboMultiplier >= 2 && jumpsSinceLastDoubleJump >= 2) {
+          // Double jump power scales with combo multiplier
+          const doubleJumpBoost = 1.0 + (comboMultiplier - 2) * 0.3; // 1.0x at combo 2, up to 3.4x at combo 10
+          car.enableDoubleJump(doubleJumpBoost);
+          jumpsSinceLastDoubleJump = 0; // Reset counter
+          ui.showDoubleJumpReady(); // Visual indicator
+        }
+        
         // Calculate points with multiplier
         const basePoints = 30;
         const pointsEarned = basePoints * comboMultiplier;
@@ -204,6 +217,7 @@ export function game(scene: THREE.Scene) {
     comboMultiplier = 1;
     comboCount = 0;
     lastJumpTime = 0;
+    jumpsSinceLastDoubleJump = 0;
     obstacles.forEach(o => scene.remove(o.mesh));
     obstacles = [];
     car.lane = 1;
@@ -213,6 +227,9 @@ export function game(scene: THREE.Scene) {
     car.jumpFrame = 0;
     car.dipping = false;
     car.dipFrame = 0;
+    car.canDoubleJump = false;
+    car.hasDoubleJumped = false;
+    car.doubleJumpBoost = 1.0;
     car.jumpDuration = 60; // Reset to base duration
     car.mesh.position.y = 0.25;
     car.resetJumpDuration(); // Reset jump duration to base
@@ -235,6 +252,8 @@ export function game(scene: THREE.Scene) {
       if (lastJumpTime > COMBO_TIMEOUT) {
         comboCount = 0;
         comboMultiplier = 1;
+        jumpsSinceLastDoubleJump = 0;
+        car.canDoubleJump = false; // Lose double jump ability on combo timeout
       }
       
       // Update background for parallax effect

@@ -41,6 +41,16 @@
   }
 }
 
+/* Pulse animation for double jump notification */
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
 #game-container {
   position: relative;
   width: 100vw;
@@ -102,7 +112,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 24px;
+  font-size: 3.5rem;
   text-align: center;
   text-shadow: 0 0 15px #ff0000;
   pointer-events: auto;

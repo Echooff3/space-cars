@@ -13,6 +13,9 @@ export class Car {
   maxJumpDuration: number = JUMP_DURATION * 2.5; // Cap at 2.5x base duration
   dipping: boolean = false;
   dipFrame: number = 0;
+  canDoubleJump: boolean = false; // Can perform double jump
+  hasDoubleJumped: boolean = false; // Has used double jump in current jump
+  doubleJumpBoost: number = 1.0; // Multiplier for double jump power
 
   constructor() {
     const geometry = new THREE.BoxGeometry(1, 0.5, 2);
@@ -38,9 +41,33 @@ export class Car {
 
   jump(): void {
     if (!this.jumping && !this.dipping) {
+      // Start first jump
       this.dipping = true;
       this.dipFrame = DIP_DURATION;
+      this.hasDoubleJumped = false; // Reset double jump for new jump
+    } else if (this.jumping && this.canDoubleJump && !this.hasDoubleJumped) {
+      // Perform double jump!
+      this.hasDoubleJumped = true;
+      this.canDoubleJump = false; // Use up double jump ability
+      
+      // Boost based on combo multiplier
+      const heightBoost = JUMP_HEIGHT * 0.4 * this.doubleJumpBoost; // 40% of jump height, scaled by boost
+      const durationBoost = Math.floor(20 * this.doubleJumpBoost); // 20-60 frames depending on boost
+      
+      // Add to current jump frame and duration
+      this.jumpFrame += durationBoost;
+      this.jumpDuration += durationBoost;
+      
+      // Add extra velocity by resetting to higher position
+      const currentProgress = this.jumpFrame / this.jumpDuration;
+      // Give a significant boost to vertical position
+      this.mesh.position.y += heightBoost;
     }
+  }
+
+  enableDoubleJump(boostMultiplier: number = 1.0): void {
+    this.canDoubleJump = true;
+    this.doubleJumpBoost = boostMultiplier;
   }
 
   extendJumpDuration(amount: number = 10): void {

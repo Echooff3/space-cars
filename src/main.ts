@@ -104,32 +104,38 @@ async function main(): Promise<void> {
   // Touch controls
   let touchStartX = 0;
   let touchStartY = 0;
+  let touchStartTime = 0;
   const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
 
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
+    touchStartTime = Date.now();
   });
 
   canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
+    const touchEndTime = Date.now();
     const deltaX = touchEndX - touchStartX;
     const deltaY = touchEndY - touchStartY;
+    const touchDuration = touchEndTime - touchStartTime;
     const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
 
-    if (Math.abs(deltaX) > screenWidth * 0.1 && Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Check if it's a tap (short duration and minimal movement)
+    const isTap = touchDuration < 200 && Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30;
+
+    if (isTap) {
+      // Tap to jump
+      gameInstance.jump();
+    } else if (Math.abs(deltaX) > screenWidth * 0.1 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Swipe left/right for lane change
       if (deltaX > 0) {
         gameInstance.moveRight();
       } else {
         gameInstance.moveLeft();
-      }
-    } else if (Math.abs(deltaY) > screenHeight * 0.1 && Math.abs(deltaY) > Math.abs(deltaX)) {
-      if (deltaY < 0) { // Swipe up
-        gameInstance.jump();
       }
     }
   });

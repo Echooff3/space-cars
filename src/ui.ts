@@ -108,6 +108,34 @@ export const ui = {
     }
   },
 
+  showDoubleJumpReady(): void {
+    // Create floating "DOUBLE JUMP READY!" text
+    const message = document.createElement('div');
+    message.innerHTML = '⚡ DOUBLE JUMP<br>UNLOCKED! ⚡';
+    message.style.position = 'absolute';
+    message.style.top = '35%';
+    message.style.left = '50%';
+    message.style.transform = 'translate(-50%, -50%)';
+    message.style.fontSize = '2.5rem';
+    message.style.fontWeight = '900';
+    message.style.color = '#00ffff';
+    message.style.textShadow = '0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 90px #00ffff';
+    message.style.pointerEvents = 'none';
+    message.style.zIndex = '100';
+    message.style.animation = 'pulse 0.5s ease-in-out';
+    message.style.fontFamily = "'Orbitron', sans-serif";
+    message.style.textAlign = 'center';
+    message.style.lineHeight = '1.2';
+    
+    const container = document.getElementById('game-container');
+    if (container) {
+      container.appendChild(message);
+      setTimeout(() => {
+        message.remove();
+      }, 1500);
+    }
+  },
+
   async saveHighScore(score: number): Promise<void> {
     const currentHigh = await persistence.getItem('highScore');
     const parsedHigh = parseInt(currentHigh ?? '0');
