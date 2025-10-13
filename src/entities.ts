@@ -131,10 +131,17 @@ export class Car {
     return this.jumping;
   }
 
-  getBounds(): { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number } {
-    const halfX = 0.4; // Smaller hitbox: reduced from 0.5 (car width 1, now effective 0.8)
-    const halfY = 0.2; // Smaller vertical hitbox
-    const halfZ = 0.8; // Smaller depth hitbox: reduced from 1 (car depth 2, now 1.6)
+  getBounds(hitboxMultiplier: number = 1.0): { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number } {
+    // Base hitbox sizes (already smaller than actual geometry)
+    const baseHalfX = 0.4; // Smaller hitbox: reduced from 0.5 (car width 1, now effective 0.8)
+    const baseHalfY = 0.2; // Smaller vertical hitbox
+    const baseHalfZ = 0.8; // Smaller depth hitbox: reduced from 1 (car depth 2, now 1.6)
+    
+    // Apply difficulty multiplier
+    const halfX = baseHalfX * hitboxMultiplier;
+    const halfY = baseHalfY * hitboxMultiplier;
+    const halfZ = baseHalfZ * hitboxMultiplier;
+    
     return {
       minX: this.mesh.position.x - halfX,
       maxX: this.mesh.position.x + halfX,
@@ -164,10 +171,17 @@ export class Obstacle {
     return this.mesh.position.z > 100;
   }
 
-  getBounds(): { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number } {
-    const halfX = 0.4; // Smaller hitbox: reduced from 0.5 (obstacle width 1, now 0.8)
-    const halfY = 1; // Full height since obstacles are on ground
-    const halfZ = 0.4; // Smaller depth hitbox: reduced from 0.5 (obstacle depth 1, now 0.8)
+  getBounds(hitboxMultiplier: number = 1.0): { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number } {
+    // Base hitbox sizes (already smaller than actual geometry)
+    const baseHalfX = 0.4; // Smaller hitbox: reduced from 0.5 (obstacle width 1, now 0.8)
+    const baseHalfY = 1; // Full height since obstacles are on ground
+    const baseHalfZ = 0.4; // Smaller depth hitbox: reduced from 0.5 (obstacle depth 1, now 0.8)
+    
+    // Apply difficulty multiplier
+    const halfX = baseHalfX * hitboxMultiplier;
+    const halfY = baseHalfY * hitboxMultiplier;
+    const halfZ = baseHalfZ * hitboxMultiplier;
+    
     return {
       minX: this.mesh.position.x - halfX,
       maxX: this.mesh.position.x + halfX,

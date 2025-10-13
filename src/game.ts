@@ -23,6 +23,20 @@ export function game(scene: THREE.Scene) {
   const COMBO_TIMEOUT = 120; // Frames before combo resets (2 seconds at 60fps)
   let jumpsSinceLastDoubleJump = 0; // Track jumps to re-enable double jump
 
+  // Calculate hitbox multiplier based on score for progressive difficulty
+  function getHitboxMultiplier(): number {
+    if (score < 2000) {
+      // Under 2000 points: 90% hitbox size (easier for beginners)
+      return 0.9;
+    } else {
+      // After 2000: increase by 1% every 1000 points
+      // 2000-2999: 91%, 3000-3999: 92%, etc. up to 100% at 12000+
+      const pointsOver2000 = score - 2000;
+      const percentIncrease = Math.floor(pointsOver2000 / 1000) * 0.01;
+      return Math.min(0.9 + percentIncrease, 1.0); // Cap at 100%
+    }
+  }
+
   // Add initial objects
   scene.add(car.mesh);
   scene.add(createRoad());
@@ -122,10 +136,13 @@ export function game(scene: THREE.Scene) {
   }
 
   function checkCollisions(): void {
-    // Use precise 3D AABB collision detection with smaller hitboxes for less aggressive gameplay
+    // Get current difficulty hitbox multiplier
+    const hitboxMultiplier = getHitboxMultiplier();
+    
+    // Use precise 3D AABB collision detection with dynamic hitboxes based on score
     obstacles.forEach((obstacle, index) => {
-      const carBounds = car.getBounds();
-      const obsBounds = obstacle.getBounds();
+      const carBounds = car.getBounds(hitboxMultiplier);
+      const obsBounds = obstacle.getBounds(hitboxMultiplier);
       // Check for AABB overlap in all three dimensions
       const overlappingX = carBounds.maxX >= obsBounds.minX && carBounds.minX <= obsBounds.maxX;
       const overlappingY = carBounds.maxY >= obsBounds.minY && carBounds.minY <= obsBounds.maxY;
