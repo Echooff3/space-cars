@@ -26,14 +26,14 @@ export class Car {
   }
 
   moveLeft(): void {
-    if (this.lane > 0 && !this.jumping) {
+    if (this.lane > 0) { // Removed !this.jumping restriction
       this.lane--;
       this.targetX = (this.lane - 1) * LANE_WIDTH;
     }
   }
 
   moveRight(): void {
-    if (this.lane < 2 && !this.jumping) {
+    if (this.lane < 2) { // Removed !this.jumping restriction
       this.lane++;
       this.targetX = (this.lane - 1) * LANE_WIDTH;
     }
