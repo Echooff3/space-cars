@@ -70,6 +70,23 @@ export class Car {
     this.doubleJumpBoost = boostMultiplier;
   }
 
+  isDescending(): boolean {
+    // Check if car is in the descending phase of the jump
+    if (!this.jumping) return false;
+    const halfDuration = this.jumpDuration / 2;
+    return this.jumpFrame <= halfDuration;
+  }
+
+  grindBoost(): void {
+    // Give a small lift when grinding on an obstacle
+    if (this.jumping && this.isDescending()) {
+      // Add frames to extend hang time
+      this.jumpFrame += 15; // Small boost
+      // Slightly increase height
+      this.mesh.position.y += 0.3;
+    }
+  }
+
   extendJumpDuration(amount: number = 10): void {
     // Extend the current jump duration, capped at max
     this.jumpDuration = Math.min(this.jumpDuration + amount, this.maxJumpDuration);
@@ -157,6 +174,7 @@ export class Obstacle {
   mesh: THREE.Mesh;
   speed: number;
   jumpedOver: boolean = false; // Track if player has jumped over this obstacle
+  grindedOn: boolean = false; // Track if player has grinded on this obstacle
 
   constructor(mesh: THREE.Mesh, speed: number) {
     this.mesh = mesh;

@@ -148,6 +148,53 @@ export function game(scene: THREE.Scene) {
       const overlappingY = carBounds.maxY >= obsBounds.minY && carBounds.minY <= obsBounds.maxY;
       const overlappingZ = carBounds.maxZ >= obsBounds.minZ && carBounds.minZ <= obsBounds.maxZ;
       
+      // Check for grind mechanic: descending car lands on top of obstacle
+      if (!obstacle.grindedOn && !obstacle.jumpedOver && overlappingX && overlappingZ && car.isJumping() && car.isDescending()) {
+        // Calculate how far over the obstacle the car is (Z-axis)
+        const carCenterZ = car.mesh.position.z;
+        const obstacleStartZ = obstacle.mesh.position.z - 0.4; // Half depth of obstacle
+        const obstacleEndZ = obstacle.mesh.position.z + 0.4;
+        const obstacleLengthZ = obstacleEndZ - obstacleStartZ;
+        const carProgressOverObstacle = (carCenterZ - obstacleStartZ) / obstacleLengthZ;
+        
+        // Check if car is more than 1/3 over the obstacle and landing on top (not colliding from side)
+        const carBottom = car.mesh.position.y - 0.2 * hitboxMultiplier;
+        const obstacleTop = obstacle.mesh.position.y + 1 * hitboxMultiplier;
+        const landingOnTop = carBottom <= obstacleTop + 0.5 && carBottom >= obstacleTop - 0.3;
+        
+        if (carProgressOverObstacle > 0.33 && landingOnTop && !overlappingY) {
+          // GRIND! Car is descending, mostly over obstacle, and landing on top
+          obstacle.grindedOn = true;
+          
+          // Give car a small lift (grindBoost already adds frames and height)
+          car.grindBoost();
+          
+          // Additional momentum boost for scoring
+          car.mesh.position.y += 0.15; // Extra lift on score
+          
+          // Award points (half of normal jump)
+          const grindPoints = 15 * comboMultiplier;
+          score += grindPoints;
+          
+          ui.setScore(score);
+          ui.showGrindBonus(grindPoints);
+          
+          // Maintain combo but don't increment it as much
+          lastJumpTime = 0; // Reset combo timer
+          
+          // Visual effect
+          createJumpSuccessEffect(obstacle.mesh.position.clone());
+          
+          // Flash obstacle cyan for grind
+          const material = obstacle.mesh.material as THREE.MeshStandardMaterial;
+          const originalEmissive = material.emissive.getHex();
+          material.emissive.setHex(0x00ffff);
+          setTimeout(() => {
+            material.emissive.setHex(originalEmissive);
+          }, 200);
+        }
+      }
+      
       // Check if car successfully jumped over obstacle (award points)
       if (!obstacle.jumpedOver && overlappingX && overlappingZ && !overlappingY && car.isJumping()) {
         // Car is jumping, in same lane and Z position, but not colliding vertically - successful jump!
@@ -178,8 +225,14 @@ export function game(scene: THREE.Scene) {
         ui.setScore(score); // Trigger pulse animation
         ui.showJumpBonus(pointsEarned, comboMultiplier); // Show points with multiplier
         
-        // Extend jump duration for chaining jumps
+        // Extend jump duration for chaining jumps + add small lift for momentum
         car.extendJumpDuration(10); // Add 10 frames of hang time
+        
+        // Give a small lift boost to maintain momentum
+        if (car.isJumping()) {
+          car.mesh.position.y += 0.2; // Small upward boost
+          car.jumpFrame += 8; // Extra frames for the lift
+        }
         
         // Create visual effect at obstacle position
         createJumpSuccessEffect(obstacle.mesh.position.clone());

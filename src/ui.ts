@@ -136,6 +136,34 @@ export const ui = {
     }
   },
 
+  showGrindBonus(points: number): void {
+    // Create floating grind bonus text
+    const bonus = document.createElement('div');
+    bonus.innerHTML = `+${points}<br><span style="font-size: 1.5rem;">GRIND!</span>`;
+    bonus.style.position = 'absolute';
+    bonus.style.top = '50%';
+    bonus.style.left = '50%';
+    bonus.style.transform = 'translate(-50%, -50%)';
+    bonus.style.fontSize = '2.5rem';
+    bonus.style.fontWeight = '900';
+    bonus.style.color = '#00ffff';
+    bonus.style.textShadow = '0 0 20px #00ffff, 0 0 40px #00ffff';
+    bonus.style.pointerEvents = 'none';
+    bonus.style.zIndex = '100';
+    bonus.style.animation = 'floatUp 1s ease-out forwards';
+    bonus.style.fontFamily = "'Orbitron', sans-serif";
+    bonus.style.textAlign = 'center';
+    bonus.style.lineHeight = '1.2';
+    
+    const container = document.getElementById('game-container');
+    if (container) {
+      container.appendChild(bonus);
+      setTimeout(() => {
+        bonus.remove();
+      }, 1000);
+    }
+  },
+
   async saveHighScore(score: number): Promise<void> {
     const currentHigh = await persistence.getItem('highScore');
     const parsedHigh = parseInt(currentHigh ?? '0');
